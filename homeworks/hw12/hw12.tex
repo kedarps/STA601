@@ -1,0 +1,88 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin -1in
+\headheight 0in
+\headsep 0in
+\textheight 8.5in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+\headheight 50pt
+\headsep 0in
+\footskip .75in
+
+\title{STA 601 - Homework 12}
+\author{Kedar Prabhudesai}
+\date{October 25, 2013}
+
+\begin{document}
+\maketitle
+
+\noindent {\Large\underline{\textbf{Linear Regression:}}}\\
+
+\noindent {\underline{\textbf{Model Specification:}}}\\
+
+This is the general form of Linear Regression Model:
+\begin{eqnarray*}
+Y_i &=& X\beta + \epsilon_i, i = 1,2,\ldots,n\\
+X &=& [X_1,X_2,\ldots,X_p],\\
+\beta &=& [\beta_1,\beta_2,\ldots,\beta_p]\\
+\epsilon_i &\sim& \mathcal{N}(0,\sigma^2)
+\end{eqnarray*}
+
+$X$ is $(n \times p)$ matrix of predictor variables and $\beta$ is a $(p \times 1)$ vector of regression co-efficients.\\
+
+Now if we want to incorporate variable selection in this model. We wish to select an unknown subset of predictors. We can thus set an indicator variable which denotes whether or not a predictor has been selected.
+\begin{eqnarray*}
+\gamma_k &=& [\gamma_1,\gamma_2,\ldots,\gamma_p].
+\end{eqnarray*} 
+
+$\gamma_j = 0$ or $1$, based on whether the $p$th predictor is selected. Hence, the total number of models we can have is $2^p$, which corresponds to the total number of combinations. Hence for each model, $\gamma_k$, we have the following,
+
+\begin{eqnarray*}
+Y_i &=& X_{\gamma_k}\beta_{\gamma_k} + \epsilon_i, i = 1,2,\ldots,n\\
+X_{\gamma_k} &=& \{X_{ij},\gamma_j = 1\},\\
+\beta_{\gamma_k} &=& \{\beta_j, \gamma_j = 1\},\\
+\epsilon_i &\sim& \mathcal{N}(0,\sigma^2),\\
+p_{\gamma_k} &=& \sum_{j = 1}^{p}{\gamma_j}.
+\end{eqnarray*}
+
+Where, $p_{\gamma_k}$ is the number of predictors selected for the $\gamma_k$th model. Hence, $X_{\gamma_k}$ is a $n \times p_{\gamma_k}$ matrix and $\beta_{\gamma_k}$ is a $p_{\gamma_k} \times 1$ vector corresponding to regression co-efficients of the $k$th model.\\
+
+To clarify the notations, $k$ is the model index and $j$ is the predictor index within the $k$th model.\\
+
+\pagebreak
+
+\noindent {\underline{\textbf{Prior Specification:}}}\\
+
+Since the appropriate model is unknown, we can model this using a mixture prior.
+\begin{eqnarray*}
+\pi(\beta_{\gamma_k},\sigma^2,\gamma_k) &=& \pi(\beta_{\gamma_k} \mid \sigma^2,\gamma_k) \times \pi(\sigma^2 \mid \gamma_k) \times \pi(\gamma_k)\\
+\pi(\beta_{\gamma_k} \mid \sigma^2,\gamma_k) &\sim& \mathcal{N}_{p_{\gamma_k}}(\beta_0,\Sigma_{p_{\gamma_k}}\sigma^2)\\
+\pi(\sigma^2 \mid \gamma_k) &\sim& Inv-Ga(\alpha,\beta)\\
+\pi_{\gamma_k} &=& \prod_{j=1}^{p}{p_0^{\gamma_j}(1-p_0)^{(1-\gamma_j)}}\\
+\pi_{\gamma_k} &=& {p_0^{\sum_{j = 1}^{p}{\gamma_j}}(1-p_0)^{\sum_{j = 1}^{p}{(1-\gamma_j)}}}\\
+\therefore \pi_{\gamma_k} &=& {p_0^{p_{\gamma_k}}(1-p_0)^{p-p_{\gamma_k}}
+\end{eqnarray*}
+
+Where, $p_0$ is the probability of selecting the $p$th predictor for any model $\gamma_k$.\\
+
+\noindent {\underline{\textbf{Posterior Computation:}}}\\
+
+For each model the posterior probability of selecting $\gamma_k$th model given data $y$ is given as follows.\\
+\begin{eqnarray*}
+P(\gamma_k \mid Y) = \frac{\pi_{\gamma_k} L_{\gamma_k}(Y \mid \gamma_k)}{L(Y)}
+\end{eqnarray*} 
+Where, $L_{\gamma_k}(Y \mid \gamma_k)$ is the marginal likelihood of data $Y$ under the model $\gamma_k$. This can be further expanded as follows,
+\begin{eqnarray*}
+P(\gamma \mid Y) = \frac{\pi_{\gamma_k}\int{L_{\gamma}(Y \mid \beta_{\gamma_k},\sigma^2,\gamma_k) \pi(\beta_{\gamma_k} \mid \sigma^2,\gamma_k) \pi(\sigma^2 \mid \gamma_k) d\beta_{\gamma_k}d\sigma^2}}{\sum_{k=1}^{2^p}{\pi_{\gamma_k} L_{\gamma_k}(Y \mid \gamma_k)}}\\
+\end{eqnarray*} 
+
+Since we have a conjugate priors we can evaluate $L_{\gamma_k}(Y \mid \gamma_k)$. It will be in Normal-Gamma form. For the denominator we need to find the marginal likelihood for each model, then weight it with the probability of each model and sum over them. As $p$ increases, $2^p$ increases even more. This becomes computationally very demanding. Also for a fixed $p_0$, we do not get a very accurate model selection because the posterior will always be high for $pp_0$ value of $\pi_{\gamma_k}$, which is the expected value of the Binomial distribution. This can be improved if we put a Beta prior on $p_0$. 
+
+
+\end{document}

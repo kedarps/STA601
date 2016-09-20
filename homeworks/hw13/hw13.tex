@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin -1in
+\headheight 0in
+\headsep 0in
+\textheight 8.5in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+\headheight 50pt
+\headsep 0in
+\footskip .75in
+
+\title{STA 601 - Homework 13}
+\author{Kedar Prabhudesai}
+\date{Novenmber 9, 2013}
+
+\begin{document}
+\maketitle
+
+\noindent {\Large\underline{\textbf{Linear Regression:}}}\\
+
+\noindent {\underline{\textbf{Model Specification:}}}\\
+
+This is the general form of Linear Regression Model:
+\begin{eqnarray*}
+Y_i &=& X_i\beta + \epsilon_i, i = 1,2,\ldots,n\\
+\beta &=& [\beta_1,\beta_2,\ldots,\beta_p]\\
+\epsilon_i &\sim& \mathcal{N}(0,\sigma^2)
+\end{eqnarray*}
+
+$X$ is $(n \times p)$ matrix of predictor variables and $\beta$ is a $(p \times 1)$ vector of regression co-efficients.\\
+
+\noindent {\underline{\textbf{Prior Specification:}}}\\
+\begin{eqnarray*}
+\beta_j &\sim& (1 - \pi_0)\delta_0 + \pi_0\mathcal{N}(0,c)\\
+\pi_0 &\sim& Beta(a,b)\\
+1/\sigma^2 = \tau &\sim& Gamma(c,d)\\
+\end{eqnarray*}
+
+\noindent {\underline{\textbf{Posterior Computation:}}}\\
+
+The posterior is given as,\\
+\begin{eqnarray*}
+p(\beta_1,\beta_2,\ldots,\beta_p,\pi_0,\tau \mid y^n,x^n) \propto \left[\prod_{j=1}^p{(1 - \pi_0)\delta_0(\beta_j) + \pi_0\mathcal{N}(\beta_j;0,c)}\right] \times \left[\pi_0^{a-1}(1 - \pi_0)^{b-1}\right]\\ \times \left[\tau^{c-1}exp(-\tau d)\right] \times \left\{\prod_{i=1}^n{\tau^{1/2}exp\left[-\frac{\tau}{2}(y_i - x_i\beta)^2\right]}\right\}
+\end{eqnarray*}
+
+\pagebreak
+
+\noindent {\underline{\textbf{Full Conditionals:}}}\\
+
+To compute this posterior we can use Gibbs Sampling, for which we need to compute full conditionals. Assume that out of $p$ predictors, we have $p_\gamma$ that are not equal to zero. \\
+\begin{eqnarray*}
+p(\pi_0 \mid \beta_1,\beta_2,\ldots,\beta_p,\tau,y^n,x^n) &\propto& \left[\prod_{j=1}^p{(1 - \pi_0)\delta_0(\beta_j) + \pi_0\mathcal{N}(\beta_j;0,c)}\right] \times \left[\pi_0^{a-1}(1 - \pi_0)^{b-1}\right]\\ 
+&\propto& \left[\prod_{j:\beta_j=0}{(1 - \pi_0)}\right] \times \left[\prod_{j:\beta_j \neq 0}{\pi_0\mathcal{N}(\beta_j;0,c)}\right] \times \left[\pi_0^{a-1}(1 - \pi_0)^{b-1}\right]\\ 
+&\propto& \left[(1-\pi_0)^{p-p_\gamma} \pi_0^{p_\gamma}\right] \times \left[\pi_0^{a-1}(1 - \pi_0)^{b-1}\right]\\
+&\propto& \pi_0^{a+p_\gamma-1}(1-\pi_0)^{b+p-p_\gamma-1}\\
+\therefore (\pi_0 \mid \beta_1,\beta_2,\ldots,\beta_p,\tau,y^n,x^n) &\propto& Beta(a+p_\gamma,b+p-p_\gamma)\\
+\end{eqnarray*}
+---------------------\\
+\begin{eqnarray*}
+p(\beta_j \mid \beta_{\sim j},\pi_0,\tau,y^n,x^n) &\propto& [(1 - \pi_0)\delta_0(\beta_j) + \pi_0\mathcal{N}(\beta_j;0,c)] \times \left\{\prod_{i=1}^n{exp\left[-\frac{\tau}{2}(y_i - x_i\beta)^2\right]}\right\}\\
+&\propto& [(1 - \pi_0)\delta_0(\beta_j) + \pi_0\mathcal{N}(\beta_j;0,c)] \times \left\{exp\left[-\frac{\tau}{2}\sum_{i=1}^n{(y_i - x_i\beta)^2\right]}\right\}\\
+\end{eqnarray*}
+---------------------\\
+\begin{eqnarray*}
+p(\tau \mid \beta_1,\beta_2,\ldots,\beta_p,\pi_0,y^n,x^n) &\propto& \left[\tau^{c-1}exp(-\tau d)\right] \times \left\{\prod_{i=1}^n{exp\left[-\frac{\tau}{2}(y_i - x_i\beta)^2\right]}\right\}\\
+&\propto& \left[\tau^{c-1}exp(-\tau d)\right] \times \left\{\tau^{n/2}exp\left[-\frac{\tau}{2}\sum_{i=1}^n{(y_i - x_i\beta)^2\right]}\right\}\\
+&\propto& \tau^{n/2+c-1}exp\left\{-\tau \left[\frac{1}{2}\sum_{i=1}^n{(y_i - x_i\beta)^2 + d\right]}\right\}\\
+\therefore p(\tau \mid \beta_1,\beta_2,\ldots,\beta_p,\pi_0,y^n,x^n) &\propto& Gamma\left(n/2+c,\left[\frac{1}{2}\sum_{i=1}^n{(y_i - x_i\beta)^2 + d\right]\right)\\
+\end{eqnarray*}
+
+We can perform Gibbs Sampling using these full conditionals. I could not simplify the full conditional for $p(\beta_j \mid \beta_{\sim j},\pi_0,\tau,y^n,x^n).$ We can still solve this by doing Metropolis-Hastings to update the $\beta_j$'s, similar to the way we did it in lab. 
+
+\end{document}

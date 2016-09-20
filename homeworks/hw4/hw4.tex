@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[pdftex]{graphicx}
+\usepackage[]{mcode}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin -1in
+\headheight 0in
+\headsep 0in
+\textheight 8.5in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+\headheight 50pt
+\headsep 0in
+\footskip .75in
+
+\title{STA 601 - Homework 4}
+\author{Kedar Prabhudesai}
+\date{September 13, 2013}
+
+\begin{document}
+\maketitle
+\noindent \underline{Model for Data}: $$y_i \sim Poisson(\lambda\gamma^{x_i})$$\\
+\noindent \underline{Likelihood}: 
+\begin{align*}
+L(\bold{y};\lambda,\gamma) &= \prod_{i=1}^{n}\frac{\left(\lambda\gamma^{x_i} \right)^{y_i}exp(-\lambda\gamma^{x_i} )}{y_i!}\\
+&= \prod_{i=1}^{n}\frac{\lambda^{y_i}\gamma^{x_iy_i}exp(-\lambda\gamma^{x_i} )}{y_i!}\\
+&= C(\bold{y})\lambda^{\sum_{i=1}^{n}y_i}\gamma^{\sum_{i=1}^{n}y_ix_i}\prod_{i=1}^{n}exp(-\lambda\gamma^{x_i} )\\
+\end{align*}
+
+\noindent \underline{Priors for Parameters}: $\lambda \sim Gamma(1,1), \gamma \sim Gamma(1,1).$ The Joint Distribution $p(\lambda,\gamma)=p(\lambda)p(\gamma),$ because $\lambda$ and $\gamma$ are conditionally independent given $x_i.$\\
+
+\noindent \underline{Posterior Joint Distribution}: $p(\lambda,\gamma|y).$
+\begin{align*}
+p(\lambda,\gamma | \bold{y}) &\propto L(\bold{y};\lambda,\gamma)p(\lambda,\gamma)\\
+&\propto \lambda^{\sum_{i=1}^{n}y_i}\gamma^{\sum_{i=1}^{n}y_ix_i}\prod_{i=1}^{n} exp(-\lambda\gamma^{x_i})\times exp(-\lambda) \times exp(-\gamma)\\
+p(\lambda,\gamma|\bold{y}) &\propto \lambda^{\sum_{i=1}^{n}y_i}\gamma^{\sum_{i=1}^{n}y_ix_i}\prod_{i=1}^{n} exp(-\lambda\gamma^{x_i} -\lambda -\gamma)\\
+\end{align*}
+
+\noindent This expression does not look like a Gamma Distribution, hence the Joint Posterior is not conjugate. However, if we get the full conditionals we will get Conjugacy.
+\pagebreak
+
+\noindent \underline{Full Conditionals}:
+\begin{align*}
+p(\lambda|\gamma,\bold{y}) &\propto \lambda^{\sum_{i=1}^{n}y_i} exp\left[-\lambda\left(\sum_{i=1}^{n}\gamma^{x_i}+n\right)\right]\\
+&\propto \lambda^{\left(\sum_{i=1}^{n}y_i + 1 \right)- 1} exp\left[-\lambda\left(\sum_{i=1}^{n}\gamma^{x_i}+n\right)\right]\\
+\lambda|\gamma,\bold{y} &\sim Gamma\left(\sum_{i=1}^{n}y_i + 1,\sum_{i=1}^{n}\gamma^{x_i}+n\right).\\
+\end{align*}
+
+\noindent Now,
+
+\begin{align*}
+p(\gamma|\lambda,\bold{y}) &\propto \gamma^{\sum_{i=1}^{n}y_ix_i} exp\left(-\lambda\sum_{i=1}^{n}\gamma^{x_i} +\gamma\right)
+\end{align*}
+
+\noindent To solve for this, we will assume that $m$ out of $n$ subjects are treated. Since, $x_i$ is 1 for treated subjects, and 0 for untreated, the above expression simplifies as,
+
+\begin{align*}
+p(\gamma|\lambda,\bold{y}) &\propto \gamma^{\sum_{i=1}^{n}y_ix_i} exp\left[-\lambda\left(n-m+m\gamma\right)+\gamma\right]\\
+&\propto \gamma^{\sum_{i=1}^{n}y_ix_i} exp\left[ -\gamma\left(\lambda m+1\right)\right]\\
+\gamma|\lambda,\bold{y} &\sim Gamma\left(\sum_{i=1}^{n}y_ix_i+1,\lambda m+1\right)\\
+\end{align*}
+where, m is the number of treated subjects.\\
+
+\noindent Therefore, to sample from the Joint Posterior we can do Gibbs Sampling.\\
+Select, $\gamma^{(0)},$\\
+Draw, $\lambda^{(1)} \sim p(\lambda|\gamma^{(0)},\bold{y})$\\
+Then Draw, $\gamma^{(1)} \sim p(\gamma|\lambda^{(1)},\bold{y})$\\
+Hence, we get $\{\lambda^{(1)},\gamma^{(1)}\}$.\\
+Repeat.
+
+
+\end{document}

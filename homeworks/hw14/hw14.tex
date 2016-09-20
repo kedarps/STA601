@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage[pdftex]{graphicx}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\lstset{breakatwhitespace=false}
+\usepackage{pgfplots}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin -1in
+\headheight 0in
+\headsep 0in
+\textheight 8.5in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+\headheight 50pt
+\headsep 0in
+\footskip .75in
+
+\title{STA 601 - Homework 14}
+\author{Kedar Prabhudesai}
+\date{November 9, 2013}
+
+\begin{document}
+\maketitle
+
+\noindent {\Large\underline{\textbf{Probit Model:}}}\\
+
+\noindent {\underline{\textbf{Model Specification:}}}\\
+
+$X$ is $(p \times n)$ matrix of predictor variables and $\beta$ is a $(p \times 1)$ vector of regression co-efficients. $Y$ is $(n \times 1)$ vector of binary responses. We use an additional latent variable $Z$ to define our probit model.\\
+
+General form of Probit Model:
+\begin{eqnarray*}
+z_i &\sim& \mathcal{N}(x_i'\beta,1)\\
+y_i &=& \mathbbm{1}(z_i > 0)\\
+\end{eqnarray*}
+
+Which is the same as,
+\begin{eqnarray*}
+P(y_i = 1 \mid x_i,\beta) &=& \Phi(x_i'\beta)\\
+\Phi(z) &=& \int_{-\infty}^z{\frac{1}{\sqrt{2\pi}}e^{-s^2/2}ds}\\
+\end{eqnarray*}
+
+\noindent {\underline{\textbf{Complete Data Likelihood:}}}\\
+\begin{eqnarray*}
+L(x^n,y^n \mid z^n,\beta) = \prod_{i=1}^n{\mathcal{N}(z_i;x_i'\beta,1)} \times \prod_{i=1}^n{\mathbbm{1}(z_i > 0)y_i + \mathbbm{1}(z_i < 0)(1-y_i)}
+\end{eqnarray*}
+
+\noindent {\underline{\textbf{Prior Specification:}}}\\
+\begin{eqnarray*}
+\beta \sim \mathcal{N}_p(\beta_0,\Sigma_{\beta})
+\end{eqnarray*}
+
+\noindent {\underline{\textbf{Posterior:}}}\\
+
+The posterior is given as,
+\begin{eqnarray*}
+p(z^n,\beta \mid x^n,y^n) \propto \mathcal{N}_p(\beta;\beta_0,\Sigma_{\beta}) \times \prod_{i=1}^n{\mathcal{N}(z_i;x_i'\beta,1)} \times \prod_{i=1}^n{\left[\mathbbm{1}(z_i > 0)y_i + \mathbbm{1}(z_i < 0)(1-y_i)\right]}
+\end{eqnarray*}
+
+\pagebreak
+
+\noindent {\underline{\textbf{Full Conditionals:}}}\\
+
+To compute this posterior we can use Gibbs Sampling, for which we need to compute full conditionals. 
+\begin{eqnarray*}
+p(\beta \mid x^n,y^n,z^n) &\propto& \mathcal{N}_p(\beta;\beta_0,\Sigma_{\beta}) \times \prod_{i=1}^n{\mathcal{N}(z_i;x_i'\beta,1)}\\
+&\propto& \mathcal{N}_p(\beta^*,\Sigma_{\beta}^*)
+\end{eqnarray*}
+Where, (Referring to class notes,)
+\begin{eqnarray*}
+\Sigma_{\beta}^* &=& (\Sigma_{\beta}^{-1} + X'X)^{-1}\\
+\end{eqnarray*}
+Let $\Sigma_{\beta}^{-1} = 0.$ (Improper Prior)
+\begin{eqnarray*}
+\beta^* &=& (X'X)^{-1}X'z\\
+\Sigma_{\beta}^* &=& (X'X)^{-1}\\
+\end{eqnarray*}
+---------------------\\
+\begin{eqnarray*}
+p(z_i \mid z_{\sim i},\beta,x^n,y^n) &\propto& \mathcal{N}(z_i;x_i'\beta,1) \times \left[\mathbbm{1}(z_i > 0)y_i + \mathbbm{1}(z_i < 0)(1-y_i)\right]\\
+\therefore p(z_i \mid y_i = 1,z_{\sim i},\beta,x^n) &\propto& \mathcal{N}_+(x_i'\beta,1)\\
+\therefore p(z_i \mid y_i = 0,z_{\sim i},\beta,x^n) &\propto& \mathcal{N}_-(x_i'\beta,1)\\
+\end{eqnarray*}
+Where, $\mathcal{N}_+$ refers to the positive support of the Normal Distribution $[0,\infty]$, and $\mathcal{N}_-$ is the negative support $[-\infty,0].$\\
+
+\noindent {\underline{\textbf{Simulation:}}}\\
+I used one predictor, with true beta values $[2,5].$ Using the above full conditionals we can do Gibbs Sampling as follows,\\
+
+(1) Start with \{z_i^{(0)}\}\\
+
+(2) Update $\beta^{(s)} \sim \mathcal{N}_p(\beta^*,\Sigma_{\beta}^*).$\\
+
+(3) Update $(z_i^{(s)} \mid y_i = 1) \sim \mathcal{N}_+(x_i'\beta,1)$ OR $(z_i^{(s)} \mid y_i = 0) \sim \mathcal{N}_-(x_i'\beta,1).$\\
+
+\noindent {\underline{\textbf{Sampling Results:}}}\\
+I used $5000$ samples with $1000$ Burn-In. Following are estimates from Gibbs Sampler.\\
+$\beta_0 = 1.9550$ [$0.7548,3.5509$].\\
+$\beta_1 = 4.5234$ [$2.6571,6.7894$].\\
+
+\pagebreak
+\noindent {\Large\underline{\textbf{Appendix:}}}\\
+\lstinputlisting{C:/Users/ksp6/Documents/Classes/2013-Fall/STA601-BayesAndModStats/homeworks/hw14/hw14.m}
+
+\end{document}

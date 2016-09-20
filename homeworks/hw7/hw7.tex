@@ -1,0 +1,68 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[pdftex]{graphicx}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\lstset{breakatwhitespace=false}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin -1in
+\headheight 0in
+\headsep 0in
+\textheight 8.5in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+\headheight 50pt
+\headsep 0in
+\footskip .75in
+
+\title{STA 601 - Homework 7}
+\author{Kedar Prabhudesai}
+\date{September 25, 2013} 
+
+\begin{document}
+\maketitle
+
+%$\mu_{Bayes} = \left[\begin{matrix}\mu_1\\\mu_2\end{matrix}\right]$ and $\Sigma_{Bayes} = \left[\begin{matrix}\sigma_1 & \rho_{Bayes}\\\rho_{est} & \sigma_2\end{matrix}\right].$
+   
+\begin{enumerate}
+
+\item \underline{Data:}\\
+We generate, $y_i \sim \mathcal{N}_2\left(\left[\begin{matrix}0\\0\end{matrix}\right],\left[\begin{matrix}1 & 0.8\\0.8 & 1\end{matrix}\right]\right)$, $i = 1,2,\ldots,100.$\\
+
+We can calculate $\mu_{MLE}$ and $\Sigma_{MLE}$, from this generated data.
+
+Then we run Gibbs Sampler and estimate $\mu_{Bayes}$ and $\Sigma_{Bayes}.$\\
+
+\item \underline{Predictive Density:}\\
+For prediction, we will generate 50 new samples $(y_1,y_2)$, and predict $y_1|y_2,$ using the given density,\\
+$(y_{j1}|y_{j2}=a) \sim \mathcal{N}\left(\mu_1+\frac{\sigma_1}{\sigma_2}\rho(a-\mu_2),(1-\rho^2)\sigma_{1}^{2}\right).$\\
+\\
+Prediction Estimate, $E_{True}(y_1|y_2) =  0.0608.$\\
+95\% Credible Intervals: [-1.8264 2.0562].
+
+\item \underline{Mean Square Errors:}\\
+We will then use MLE and Bayes estimates, and predict $(y_{j1}|y_{j2}=a)$. Then we will compute $E(y_1|y_2),$ for each of the two predictors and compare their performance with the Truth predictor using Mean Squared Error.\\
+\\
+$\left[E_{True}(y_1|y_2) - E_{MLE}(y_1|y_2)\right]^2 = 0.0807.$\\
+$\left[E_{True}(y_1|y_2) - E_{Bayes}(y_1|y_2)\right]^2 = 0.0039.$\\
+
+\item \underline{Comparison:}\\
+$E_{MLE}(y_1|y_2) = 0.3448.$\\
+$E_{Joint}(y_1|y_2) = 0.0667.$ Here, $(y_1,y_2) \sim \mathcal{N}_2(\mu_{MLE},\Sigma_{MLE}).$\\
+
+Hence, the results are indeed quite different. \\
+
+\item \underline{Confidence Intervals:}
+Following are the  Predictive Intervals for the Bayes and MLE Predictors.\\
+Interval for $E_{MLE}(y_1|y_2):$[-1.7668 2.9977].\\
+Interval for $E_{Bayes}(y_1|y_2):$[-2.1768 2.5306].\\
+\end{enumerate}
+
+\pagebreak
+\noindent {\Large\underline{\textbf{Appendix:}}}\\
+\lstinputlisting{C:/Users/ksp6/Documents/Classes/2013-Fall/STA601-BayesAndModStats/homeworks/hw7/hw7.m}
+
+\end{document}
